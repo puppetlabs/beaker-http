@@ -39,7 +39,7 @@ describe Beaker::Http::FaradayBeakerLogger do
       end
     end
 
-    it 'sends extra and debug requests logging to the logger' do
+    it 'sends extra debug requests to the logger' do
       expect(host.logger).to receive(:info).with('POST: http://test.com/path').once
       expect(host.logger).to receive(:info).with(/RESPONSE CODE: 201/).once
       expect(host.logger).to receive(:debug).with(/RESPONSE BODY:/).once

@@ -2,11 +2,11 @@ require 'spec_helper'
 
 module Beaker
   module Http
-    describe Http do
+    describe Connection do
 
       let(:host) {double('host')}
 
-      subject { Http.new( host ) }
+      subject { Connection.new( host ) }
 
 
       context 'with a beaker host passed in' do
@@ -27,17 +27,13 @@ module Beaker
         end
 
         it 'sets the middleware stack' do
-          default_middleware_stack =  [FaradayMiddleware::EncodeJson,
-                                       FaradayMiddleware::FollowRedirects,
-                                       Faraday::Response::RaiseError,
-                                       FaradayMiddleware::ParseJson,
-                                       Beaker::Http::FaradayBeakerLogger,
-                                       Faraday::Adapter::NetHttp]
-          expect(subject.connection.builder.handlers).to eq(default_middleware_stack)
+
+          expect(subject.connection.builder.handlers).to eq(HttpHelpers::DEFAULT_MIDDLEWARE_STACK)
+
         end
 
         it 'routes all http verbs to the connection object' do
-          http_verbs = [:get, :post, :put, :delete, :head, :path]
+          http_verbs = [:get, :post, :put, :delete, :head, :patch]
 
           http_verbs.each do |verb|
             expect(subject.connection).to receive(verb)
@@ -45,10 +41,22 @@ module Beaker
           end
         end
 
-        describe '.configure_cacert_only_with_puppet' 
+        it 'sets the connection host to the hostname of the beaker host' do
+          allow(host).to receive(:hostname).and_return('puppet.com')
+          expect(subject.connection.host).to eq('puppet.com')
+          subject
+        end
+
+        describe '#remove_error_checking' do
+          it 'removes the faraday middleware raising errors on 4xx and 5xx requests' do
+            subject.remove_error_checking
+            expect(subject.connection.builder.handlers).not_to include(Faraday::Response::RaiseError)
+          end
+        end
+
+        describe '#configure_cacert_only_with_puppet'
         it 'adds a ca_cert to the connection and changes the scheme to https' do
           allow(subject).to receive(:get_host_cacert).with(host).and_return('ca_file')
-          allow(subject).to receive(:set_connection_scheme).with('https').and_call_original
           subject.configure_cacert_only_with_puppet
           expect(subject.connection.ssl['ca_file']).to eq('ca_file')
           expect(subject.connection.scheme).to eq('https')
