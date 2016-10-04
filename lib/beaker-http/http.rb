@@ -1,19 +1,28 @@
 module Beaker
   module Http
 
-    # Beaker Http objects are essentially wrappers for a connection object that
-    # utilizes a Beaker::Host object for easier setup during testing.
+    # == Beaker::Http::Connection object instantiation examples
+    # These examples are for using the Connection object directly. If you are trying to use
+    # this from within a test, consider using the
+    # {Beaker::DSL::Helpers::WebHelpers DSL constructors} instead.
+    # @see Beaker::DSL::Helpers::WebHelpers
     class Connection
       include Beaker::Http::Helpers
       extend Forwardable
 
-      attr_accessor :connection
+      attr_reader :connection
 
+      # Beaker::Http::Connection objects can be instantiated with object that
+      # utilizes a  object for easier setup during testing.
+      #
+      # @param [Hash] options Typically the global options provided by Beaker.
+      # @option options [Beaker::Logger] :logger
+      # @option options [Boolean] :log_http_bodies
       def initialize(options)
         @connection = create_default_connection(options)
       end
 
-      def_delegators :connection, :get, :post, :put, :delete, :head, :patch, :scheme, :scheme=, :host, :host=, :port, :port=, :url_prefix, :url_prefix=
+      def_delegators :connection, :get, :post, :put, :delete, :head, :patch, :url_prefix, :url_prefix=, :ssl, :options
 
       def create_default_connection(options)
         Faraday.new do |conn|
@@ -22,7 +31,15 @@ module Beaker
           conn.response :follow_redirects
           conn.response :raise_error
           conn.response :json, :content_type => /\bjson$/
-          conn.response :faraday_beaker_logger, options[:logger], bodies: true
+
+          # We can supply a third argument, a Hash with key of :bodies set to true or false,
+          # to configure whether or not to log http bodies in requests and responses.
+          # However, to uncomplicate things, we will just use the default
+          # set in the middleware and not allow the http log level to be set
+          # independently of the beaker log level. If we find that we should allow setting
+          # of http bodies independent of the beaker log level, we should expose that setting
+          # here.
+          conn.response :faraday_beaker_logger, options[:logger]
 
           conn.adapter :net_http
         end
@@ -36,16 +53,16 @@ module Beaker
       end
 
       def set_cacert(ca_file)
-        connection.ssl['ca_file'] = ca_file
-        connection.scheme = 'https'
+        ssl['ca_file'] = ca_file
+        url_prefix.scheme = 'https'
       end
 
       def set_client_key(client_key)
-        connection.ssl['client_key'] = client_key
+        ssl['client_key'] = client_key
       end
 
       def set_client_cert(client_cert)
-        connection.ssl['client_cert'] = client_cert
+        ssl['client_cert'] = client_cert
       end
 
       # Use this method if you are connecting as a user to the system; it will
@@ -65,8 +82,8 @@ module Beaker
         client_key_raw = get_host_private_key(host)
         client_cert_raw = get_host_cert(host)
 
-        set_client_key(OpenSSL::PKey.read(client_key_raw))
-        set_client_cert(OpenSSL::X509::Certificate.new(client_cert_raw))
+        ssl['client_key'] = OpenSSL::PKey.read(client_key_raw)
+        ssl['client_cert'] = OpenSSL::X509::Certificate.new(client_cert_raw)
 
         nil
       end

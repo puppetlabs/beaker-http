@@ -3,7 +3,7 @@ module Beaker
     class FaradayBeakerLogger < Faraday::Response::Middleware
       extend Forwardable
 
-      DEFAULT_OPTIONS = { :bodies => false }
+      DEFAULT_OPTIONS = { :bodies => true }
 
       def initialize(app, logger, options = {} )
         super(app)
@@ -41,17 +41,12 @@ module Beaker
         end
       end
 
-      def pretty_inspect(body)
-        require 'pp' unless body.respond_to?(:pretty_inspect)
-        body.pretty_inspect
-      end
-
       def log_body?(type)
         case @options[:bodies]
         when Hash then @options[:bodies][type]
         else @options[:bodies]
-        end
       end
+    end
 
     end
   end
