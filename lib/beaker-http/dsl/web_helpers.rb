@@ -56,11 +56,7 @@ module Beaker::DSL::Helpers::WebHelpers
 
     connection.connection.options.timeout = options[:read_timeout] if options[:read_timeout]
 
-    if request_method == :post
-      response = connection.post { |conn| conn.body = body }
-    else
-      response = connection.get
-    end
+    response = connection.send(request_method) { |conn| conn.body = body }
     response
   end
 end

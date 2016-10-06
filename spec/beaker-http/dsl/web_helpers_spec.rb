@@ -54,6 +54,17 @@ describe ClassMixedWithDSLWebHelpers do
       expect(subject.http_request(url, request_method)).to eq(mock_response)
     end
 
+    context 'send a DELETE request to the url with the minimum required params' do
+      let (:request_method) { :delete }
+      it 'sends a DELETE request to the url with the minimum required params' do
+        expect(mock_connection).to receive(:delete).and_return(mock_response)
+        expect(URI).to receive(:parse).with(url).and_call_original
+        expect(mock_connection).to receive(:url_prefix=).and_call_original
+        expect(subject).to receive(:generate_new_http_connection).and_return(mock_connection)
+        expect(subject.http_request(url, request_method)).to eq(mock_response)
+      end
+    end
+
     context 'when the request_method is POST' do
       let (:request_method) { :post }
       let (:body) {double('body')}
@@ -67,6 +78,23 @@ describe ClassMixedWithDSLWebHelpers do
         expect(subject).to receive(:generate_new_http_connection).and_return(mock_connection)
         expect(subject.http_request(url, request_method, nil, nil, body, {})).to eq(mock_response)
       end
+    end
+
+
+    context 'when the request_method is PUT' do
+      let (:request_method) { :put }
+      let (:body) {double('body')}
+      let (:conn) { double('conn') }
+
+      it 'sends a body along in the request' do
+        expect(conn).to receive(:body=).with(body)
+        expect(mock_connection).to receive(:put).and_yield(conn).and_return(mock_response)
+        expect(URI).to receive(:parse).with(url).and_call_original
+        expect(mock_connection).to receive(:url_prefix=).and_call_original
+        expect(subject).to receive(:generate_new_http_connection).and_return(mock_connection)
+        expect(subject.http_request(url, request_method, nil, nil, body, {})).to eq(mock_response)
+      end
+
     end
 
     it 'can set the timeout from the options hash passed in' do
