@@ -54,7 +54,7 @@ module Beaker::DSL::Helpers::WebHelpers
     # ewwww
     connection.ssl[:verify] = false
 
-    connection.options.timeout = options[:read_timeout] if options[:read_timeout]
+    connection.connection.options.timeout = options[:read_timeout] if options[:read_timeout]
 
     if request_method == :post
       response = connection.post { |conn| conn.body = body }

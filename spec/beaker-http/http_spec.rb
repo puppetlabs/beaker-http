@@ -32,7 +32,7 @@ module Beaker
         end
 
         it 'routes other useful methods to the connection object' do
-          useful_methods = [:url_prefix, :url_prefix=, :ssl, :options]
+          useful_methods = [:url_prefix, :url_prefix=, :ssl]
 
           useful_methods.each do |method|
             expect(subject.connection).to receive(method)

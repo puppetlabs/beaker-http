@@ -22,7 +22,7 @@ module Beaker
         @connection = create_default_connection(options)
       end
 
-      def_delegators :connection, :get, :post, :put, :delete, :head, :patch, :url_prefix, :url_prefix=, :ssl, :options
+      def_delegators :connection, :get, :post, :put, :delete, :head, :patch, :url_prefix, :url_prefix=, :ssl
 
       def create_default_connection(options)
         Faraday.new do |conn|

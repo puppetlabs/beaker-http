@@ -75,7 +75,7 @@ describe ClassMixedWithDSLWebHelpers do
       expect(mock_connection).to receive(:url_prefix=).and_call_original
       expect(subject).to receive(:generate_new_http_connection).and_return(mock_connection)
       expect(subject.http_request(url, request_method, nil, nil, nil, :read_timeout => read_timeout)).to eq(mock_response)
-      expect(mock_connection.options.timeout).to eq(read_timeout)
+      expect(mock_connection.connection.options.timeout).to eq(read_timeout)
     end
 
     context 'with a key and cert provided' do
