@@ -1,9 +1,15 @@
 # beaker-http
 
-This library is designed to assist in test scenarios where http requests to a Beaker::Host
-are required. It utilizes the Faraday library to generate requests, and the [Http](lib/beaker-http/http.rb)
-class is designed to be subclassed into objects that are more targeted to specific http
-services running on beaker hosts.
+This library adds the ability to send http traffic from the beaker coordinator itself,
+reducing the need to use beaker's DSL method `on` as an interface to `curl` on a 
+SUT(System Under Test). It utilizes the Faraday library to generate requests, and the
+[Connection](lib/beaker-http/http.rb) class in the `Beaker::Http` module is the class 
+you want to use directly, either utilizing it directly or subclassing it to build your
+own Connection class.
+
+Please use the DSL methods included in this library [here](lib/beaker-http/dsl/web_helpers.rb).
+Reference the [rubydocs](http://www.rubydoc.info/github/puppetlabs/beaker-http/master/Beaker/DSL/Helpers/WebHelpers) for more information on how to use these methods.
+
 
 ## spec testing
 
@@ -13,5 +19,8 @@ by running `bundle exec rake test:spec:run` or using the `test:spec` task.
 
 ## acceptance testing
 
-Acceptance testing will be added once the first few releases have been released.
+The acceptance folder currently contains [one acceptance test](acceptance/tests/puppetserver_requests.rb)
+that demonstrates how to use this in a beaker test; as we refine this module and solidify the
+API, more thorough acceptance testing will be coming. For now, please use that test as an example
+of how to use this library.
 
