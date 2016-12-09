@@ -46,4 +46,26 @@ describe Beaker::Http::FaradayBeakerLogger do
       conn.post() { |connection| connection.body = "BODY MOVIN'" }
     end
   end
+
+  context 'when body responses do not respond to :to_str' do
+    let (:array_response) { [1, 2, 3] }
+    before do
+      conn.builder.insert(0, Beaker::Http::FaradayBeakerLogger, logger, :bodies => true)
+      conn.adapter :test do |stub|
+        stub.post('/path') {[201, {}, array_response]}
+      end
+    end
+
+    it 'calls pretty print for that response' do
+      expect_any_instance_of(Beaker::Http::FaradayBeakerLogger).to receive(:pretty_inspect).with(array_response).once.and_call_original
+      expect(logger).to receive(:info).with('POST: http://test.com/path').once
+      expect(logger).to receive(:info).with(/RESPONSE CODE: 201/).once
+      expect(logger).to receive(:debug).with(/ELAPSED TIME:/).once
+      expect(logger).to receive(:debug).with("RESPONSE BODY:\n[1, 2, 3]\n").once
+      expect(logger).to receive(:debug).with(/REQUEST BODY:\nBODY MOVIN'/).once
+      expect(logger).to receive(:debug).with(/REQUEST HEADERS:/).once
+      expect(logger).to receive(:debug).with(/RESPONSE HEADERS:/).once
+      conn.post() { |connection| connection.body = "BODY MOVIN'" }
+    end
+  end
 end
