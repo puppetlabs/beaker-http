@@ -19,7 +19,6 @@ Gem::Specification.new do |spec|
 
   #Development dependencies
   spec.add_development_dependency 'bundler', '~> 1.6'
-  spec.add_development_dependency 'pry', '~> 0.9.12'
   spec.add_development_dependency 'rake'
   spec.add_development_dependency 'rspec', '>= 3.0.0'
 
@@ -30,7 +29,7 @@ Gem::Specification.new do |spec|
 
   #Run time dependencies
   spec.add_runtime_dependency 'json', '~> 1.8'
-  spec.add_runtime_dependency 'beaker', '~> 3.0'
+  spec.add_runtime_dependency 'beaker', '> 3.0'
   spec.add_runtime_dependency 'faraday', '~> 0.9', '>= 0.9.1'
   spec.add_runtime_dependency 'faraday_middleware', '~> 0.9'
 end
